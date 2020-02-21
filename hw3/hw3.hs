@@ -40,5 +40,28 @@ mylast [a] = Just a
 mylast (h:t) = mylast t
 mylast [] = Nothing
 
---Question 6
+--Question 8
 
+data Graph = GraphNode Int [Graph]
+
+graph1 = GraphNode 1 [GraphNode 2 [GraphNode 5 []], GraphNode 3 [], GraphNode 4 [GraphNode 6 [GraphNode 7 [],        GraphNode 8 []]]]
+
+graph2 = GraphNode 1 [GraphNode 2 [GraphNode 5 []], GraphNode 3 [], GraphNode 4 [GraphNode 6 [GraphNode 7 [graph2],  GraphNode 8 []]]]
+
+graph3 =let mycycle =GraphNode 9 [GraphNode 10 [],GraphNode 11 [], GraphNode 12 [mycycle]]in GraphNode 1 [GraphNode  2 [], GraphNode 3 [],GraphNode 4 [GraphNode 5 [], mycycle]]
+
+hasCycles :: Graph -> Bool
+hasCycles (GraphNode val []) = False
+hasCycles (GraphNode val nodes) = helper [] (GraphNode val nodes)
+
+helper :: [Int] -> Graph -> Bool
+helper seen (GraphNode val []) = False
+helper seen (GraphNode val nodes) =
+  if (val `elem` seen) == True
+    then True
+    else
+      if True `elem` loops
+        then True
+      else False
+      where
+        loops = (map (helper (val : seen)) nodes)

@@ -87,10 +87,23 @@ typecheck (ExprOp op e1 e2) =
                 _ -> Nothing
         _ -> Nothing
 typecheck (ExprIsZero expr) =
-    Nothing -- TODO
+    case typecheck expr of
+      Just TypeInt -> Just TypeBool
+      Just TypeBool -> Nothing
     {-Perform type check on an IsZero expressions, whose argument must evaluate to integer-}
 typecheck (ExprIf condition ifexpr elseexpr) =
-    Nothing -- TODO
+    case typecheck condition of
+      Just TypeInt -> Nothing
+      Just TypeBool ->
+        case typecheck ifexpr of
+          Just TypeInt -> 
+            case typecheck elseexpr of
+              Just TypeInt -> Just TypeInt
+              Just TypeBool -> Nothing
+          Just TypeBool ->
+            case typecheck elseexpr of
+              Just TypeInt -> Nothing
+              Just TypeBool -> Just TypeBool
     {-Perform type check on an If expressions. The condition must be a boolean
     expression, and both the if clause and else clause must be of the same type -}
 
@@ -130,15 +143,35 @@ eval ev =
         step (ExprInt i) = ResultInt i
         step (ExprBool b) = ResultBool b
         step (ExprOp op e1 e2) =
-            ResultInt 0 -- TODO
+          case op of
+            Add ->
+              ResultInt (res1 + res2)
+              where
+                (ResultInt res1) = eval e1
+                (ResultInt res2) = eval e2
+            Subtract ->
+              ResultInt (res1 - res2)
+              where
+                (ResultInt res1) = eval e1
+                (ResultInt res2) = eval e2
             {-Produce an ResultInt equal to the sum
             of the expressions e1 and e2 -}
-        step (ExprIsZero expr) =
-            ResultBool False -- TODO
+        step (ExprIsZero (ExprInt expr)) =
+          case expr of
+            0 -> ResultBool True
+            _ -> ResultBool False
             {-Produce a ResultBool True if the integer expression
               is equal to zero, or ResultBool False if it isn't -}
+        step (ExprIsZero (ExprOp op e1 e2)) =
+          case eval (ExprOp op e1 e2) of
+            (ResultInt 0) -> ResultBool True
+            _ -> ResultBool False
+          --we can still exprIsZero with operations inside :)
+          
         step (ExprIf condition ifpart elsepart) =
-            ResultBool False -- TODO
+          case eval condition of
+            (ResultBool True) -> eval (ifpart)
+            (ResultBool False) -> eval (elsepart)
             {-Returns the value of the ifpart expression if
               cond evaluates to true, or elsepart otherwise-}
 
