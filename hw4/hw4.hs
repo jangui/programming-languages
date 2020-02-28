@@ -19,7 +19,6 @@ frequency (h:t) =
 --Question 2
 data Tree a = Node a (Tree a) (Tree a)
             | Leaf
-            deriving Show
 
 instance Eq a => Eq (Tree a) where
   Leaf == Leaf = True
@@ -57,21 +56,74 @@ bstInsert (Node (v, n) l r) val =
             case r of
               --if right spot open, insert
               Leaf -> (Node (v, n) l (Node (val, 1) Leaf Leaf))
-              --if not open, check if we should increment the count on right, or insert
-              (Node (v2, n2) l2 r2) ->
-                if val == v 
-                  then
-                    (Node (v, n) l (Node (v2, n2+1) l2 r2))
-                  else (Node (v, n) l (bstInsert (Node (v2, n2) l2 r2) val))
+              --if not open insert on right
+              (Node (v2, n2) l2 r2) -> (Node (v, n) l (bstInsert (Node (v2, n2) l2 r2) val))
           else 
-            --val is less, insert to left
+            --val is less, go to left
             case l of
               --if space, pop it in
               Leaf -> (Node (v, n) (Node (val, 1) Leaf Leaf) r)
-              -- else check if left node needs an increment, or an insert
-              (Node (v2, n2) l2 r2) ->
-                if val == v
-                  then (Node (v, n) (Node (v2, n2+1) l2 r2) r)
-                  else (Node (v,n) (bstInsert (Node (v2, n2) l2 r2) val) r)
+              -- else insert in left
+              (Node (v2, n2) l2 r2) -> (Node (v,n) (bstInsert (Node (v2, n2) l2 r2) val) r)
 
 --Question 5
+bstLookup :: Ord a => a -> Tree (a, Int) -> Int
+bstLookup a Leaf = 0
+bstLookup a (Node (v, n) l r) = 
+  if v == a
+    then n
+    else 
+      if v > a
+        then bstLookup a l
+        else bstLookup a r
+
+--Question 6
+bstRemove :: Ord a => Tree (a, Int) -> a -> Maybe (Tree (a, Int))
+bstRemove Leaf a = Nothing
+bstRemove (Node (v, n) l r) a =
+--check if a same as parent node
+  if a == v
+    --if so remove, or decr count
+    then 
+      case n of
+      1 -> (removeHelp (Node (v, n) l r) a)
+      i -> Just (Node (v, (n-1)) l r)
+    else 
+        --check if greater than
+        if a > v
+          then --go to right
+            --if exists remove from right
+            case r of
+              Leaf -> Nothing
+              (Node (v2, n2) l2 r2) -> 
+                case (bstRemove (Node (v2, n2) l2 r2) a) of
+                  Nothing -> Nothing
+                  Just (Node (v3, n3) l3 r3) -> Just (Node (v, n) l (Node (v3, n3) l3 r3))
+          else 
+            --a is less, its in the left
+            case l of
+              --if left is leaf, a not in tree
+              Leaf -> Nothing
+              -- else check if a is == to value in child node
+              (Node (v2, n2) l2 r2) ->
+                case (bstRemove (Node (v2, n2) l2 r2) a) of
+                  Nothing -> Nothing
+                  Just (Node (v3, n3) l3 r3) -> Just (Node (v, n) (Node (v3, n3) l3 r3) r)
+
+--only called when when are removing root of tree passed
+removeHelp :: Ord a => Tree (a, Int) -> a -> Maybe (Tree (a, Int))
+removeHelp (Node (v, n) Leaf Leaf) a = Just Leaf
+
+--Question 7
+instance Show a => Show (Tree a) where
+  show mytree = printTree mytree 0
+
+--using 2 spaces instead of tabs
+printTree :: Show a => Tree a -> Int -> String
+printTree Leaf 0 = "Leaf"
+printTree Leaf n = ""
+printTree (Node v l r) n = (multStr n "  ") ++ "Node" ++ show v ++ "\n" ++ (printTree l (n+1)) ++ (printTree r (n+1))
+
+multStr :: Int -> String -> String
+multStr 0 str = ""
+multStr n str = str ++ multStr (n-1) str
