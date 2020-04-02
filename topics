@@ -1,0 +1,229 @@
+## lambda calculus ##
+  -functional language (contrary to imperative)
+    -no mutable variables or stateful operations
+    -everything is done through recursion
+
+## church numbers ##
+
+## types ##
+  -static typing
+    -compile time type check
+    -varibles are composed of a type, name, and have a mem addr
+    -ex: C++
+
+  -dynamic typing
+    -runtime type check
+    -variables have a name and value
+      -the value carries the type and has a mem addr
+    -ex: python
+
+  -types are sets of values
+    -subtyping is when children are in the set of values of parent type
+    -type synonims are not new types but aliases
+      -ex: typedef in C
+      -ex: type in Haskell
+        -data keyword makes actual new type, not synonym
+ 
+  -structural typing vs nominal typing
+  struct A {int x; string z;}
+  struct B {int x; string z;}
+    -structural typing A and B are the same
+    -nominal typing A and B are different
+      -ex: C++
+
+## haskell polymorphism ##
+functions that can work with any given type
+length: [a] -> Int
+         ^type variable
+
+types can also be polymorphic
+data Tree a = Node a (Tree a) (Tree a) | Leaf
+
+## haskell higher-order functions ##
+  -map : (a -> b) -> [a] -> [b]
+  -filter : (a -> Bool) -> [a] -> [a]
+  -foldl : (b -> a -> a) -> b -> [a] -> b
+
+## haskell data types ##
+ -data keyword makes actual new type
+
+  data Opinion = Agree | Disagree | Perhaps
+                  deriving Show
+  Agree, Disagree & Perhaps are constructors 
+
+  data Person = Person String Int | Embryo
+       ^type    ^      ^field ^field     ^constructor w/out fields
+                ^constructor
+
+       type Person has 2 constructor: Person and Embryo
+
+  -can be used to return different data types
+    -Either a b = Left a | Right B
+      -ex: somefunc: Int -> Either String Char
+  -can be used to provide error checking
+    -Maybe a = Just a | Nothing
+      -ex: somefunc: a -> Maybe a
+
+## generics (boxing, monomorphization) & type safety ##
+type safety: the prevention of type errors (which are runtime errors)
+
+Monomorphization example w/ C++
+C++: templates functions are recompliled for each type that uses it
+     this differs type checking till after template expansion
+     causes for bloated executables if template is constantly copy pasted
+     causes for slower compilation because added time expanding templates
+
+Monomorphization in C is usually done with macros (becomes very similar to how templates are implemented in C++)
+
+Boxing example w/ C
+C: to achieve generics we create structs&functions that operate on void pointers and use type casting.
+
+ex: instead of creating a link list of ints, we make a link list of void pointers
+    -benefits
+      -no need to copy paste definition of function/data struct
+        -ex: we can make link list of int pointers or string pointers, etc
+    -downfall
+      -loss of type safety (no more nice compile time errors )
+        -ex: link list can become mix of int and string pointers & etc
+        -programmer has to be in charge of proper type casting
+          -ex: outputting is dependent of type, proper cast needed
+          -can lead to undifined behavior or runtime errors
+      -slower because using pointers
+
+**note boxing's loss of type safety can be fixed w/ type erasure
+given the following C++ code:
+
+template <class T>
+class Foo {
+  T member;
+  T function(T x);
+};
+
+now image that C++ used boxing instead of monomorphization
+this means templates would not be instantiated for each class,
+but a void pointer would be used for type T. Thus code doesn't get reused, causing bloat
+however, to gain type safety type erasure is done
+basically if we have:
+Foo<int> iFoo;
+iFoo.function(3);
+the compiler will first do type checking using Foo<int>.
+once type checking is done (and succesfully passed) the compiler erases the types, allowing for void pointers to be used, and templates not having to be expanded for each type
+
+**type erasure broken in examples like Java's covarient arrays
+
+## haskell typeclasses ##
+typeclasses in haskell allow it to be strongly typed
+  this allows generics funcs to be constrained by typeclasses
+
+for example, to use == function, type must be in the Eq typeclass
+for a type to be in the Eq typeclass the type must have the == operator declared so we create an instace of it
+
+data Tree a = Node a (Tree a) (Tree a) | Leaf
+instance Eq a => Eq (Tree a) where
+  Leaf == Leaf = True
+  (Node v l r) == Leaf = False
+  Leaf == (Node v l r) = False
+  (Node v1 l1 r1) == (Node v2 l2 r2) =
+    v1 == v2 && l1 == l2 && r1 == r2 
+
+adding Tree into functor typeclass
+instance Functor Tree where
+  fmap f (Node v l r) = mapTree f (Node v l r)
+  fmap f Leaf = Leaf
+
+mapTree :: (a->b) -> Tree a -> Tree b
+mapTree func (Node val left right) = Node (func val) (mapTree func left)        (mapTree func right)
+mapTree _ Leaf = Leaf
+
+adding Tree into Show typeclass
+instance Show a => Show (Tree a) where
+  show mytree = printTree mytree 0
+
+## covariance & contravarience ##
+covariance: T is coverient iff
+                T<B> is a subtype of T<A>
+              & B is a subtype of A
+
+ex: Arrays in C++
+class A {};
+class B : pulic A {};
+
+void wantsA(A a); 
+^can call with A or B
+void wantsA(A a[]); 
+^can call with array of A or array of B
+
+Not covarient: vector in C++
+wantsA(vector<A> a);
+can only be called with vector of A
+thats why we used vectors of pointers when doing polymorphism
+
+contravarience: T is contravarience iff
+                T<A> is a subtype of T<B>
+              & B is a subtype of A
+
+why we want a covarient and a contravarient type? (Java)
+if we want to add things to the collection, it must be contravarient (? super a)
+why? an array of X can contain subtypes of X but not supertypes
+if we have a function that takes array of A, because array is contravarient, we can pass an array of B to the func. however, during compile time, we don't know the runtime type, so if we try adding an A object to the array, we get a runtime error if we try adding it to an array of Bs. Thus, doing a compile time check for things like these saves our ass
+
+if we want to display, we need covarience, because we need garenties that what we are displaying exists.  ( ? extends A)
+for example if we want an array of As we could also pass array of Bs. All B object derive from A so we can be assured that anything of an A we try to display, a B will have. However if we have a contravarient type, we cant try to display B's things because if an A gets passed thers no garentees they have the same stuff
+
+**in C++ an array of X can't contain subtypes of X
+
+## tail-call recursion ##
+tail-call recursion: recursing as the last step in recursive func
+                     this allow to dismantel stack frame of caller
+                     this allows for recursion to go on infinetely bcs
+                     stack space never gets fully used
+
+**not all recursive functions can be written as tail call recursive
+
+**not all languages support tail call recursion (python doesnt, haskell does)
+
+example:
+**note written in python although tail call recursion not supported
+
+TAIL CALL RECURSIVE:
+  def mystery(lst, lst2=[]):
+    if len(lst) < 2:
+      return (lst2 + lst)
+    lst2 = lst2 +[lst[1]] + [lst[0]]
+    return mystery(lst[2:], lst2)
+
+NOT TAIL CALL RECURSIVE: 
+  def mystery(lst):
+    if len(lst) < 2:
+      return lst
+    return [lst[1]] + [lst[0]] + mystery(lst[2:])
+
+# purity, effect & state ##
+
+Effect: something that changes the state of the system
+        ex timeline: old state -> call effectful func -> new state 
+
+Purity: a function is pure if it does not alter its arguments
+        pure functions have no effect
+
+the state of the system is anything that can be changed. your display has a state, which is usually changing and can be changed. files have a state. other hardware devices as well. etc.
+
+## lazy evaluation ##
+how haskell implements infinite data types
+
+infinite data types are only expanded as far out as they need to be because they are defined recursively
+
+-ex: an inifinite list of all integers starts at 1 and the next number is the last plus 1
+
+-ex: data Stream a = Chunk a (Stream a)
+  -defined recursively
+
+## monads ##
+type class with bind function defined
+
+
+##EXAM 1 is everything above
+
+## kinds ##
+-types of types
+
