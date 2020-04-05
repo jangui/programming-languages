@@ -1,0 +1,36 @@
+Jaime Danguillecourt
+jd3846
+
+## Question 1
+
+engine8
+diesel locomotive17
+steam engine97
+
+## Question 2
+
+Super class: Integer
+Super Super: Number
+
+Both Integer and Number are abstract classes
+
+## Question 3
+
+true belongs to the class True
+
+Heirachy:
+ProtoObject
+  Object
+    Boolean
+      True
+
+## Question 4
+
+The 'or' method for True returns its self (true) because an or w/ true is always true
+
+## Question 5
+
+The 'and' method for Boolean passes on the work of doing the and to its subclasses (either True or False)
+
+
+**For question 6, the homework refers to Kernal-Numbers package, in my Pharo there is no "Kernal-Numbers" but there is a "Numbers" within the package "Kernal" (which seems to be a folder for packages?). I don't know if this makes a difference but I thought I'd mention it in case.
