@@ -1,0 +1,137 @@
+*****************************************************
+** Answer Sheet for CS-UY 3314 - First Examination **
+** Spring 2020                                     **
+** Enter all your answers in this file at the      **
+** specified location. Don't forget to enter your  **
+** name and NetID. You must also type the          **
+** affirmation of academic integrity into this     **
+** file.                                           **
+*****************************************************
+
+
+===================================
+Student Name: Jaime Danguillecourt
+Student NetID: jd3846
+
+===================================
+Type the affirmation of academic integrity
+(from the first page of the exam) here:
+
+Jaime Danguillecourt, affirm that I have complete the exam completely on my own, without consulting outside resources. I have followed the required rules. I understand that violating these rules would represent academic dishonesty.
+
+******************************
+** Section 1: True or False **
+******************************
+
+===================================
+Question 1: false
+Question 2: false
+Question 3: false
+Question 4: false
+Question 5: true
+Question 6: true
+
+
+******************************
+** Section 2: Short answers **
+******************************
+
+===================================
+Question 7
+if the following line compiles:
+  Foo<Teacher> *x = new Foo<Person>;
+then Foo is contravarient
+if Foo is contravarient then the go function should compile just fine
+however if Foo was covarient, the go function could cause runtime errors
+
+===================================
+Question 8
+This is not a tail recursive function because the last thing we do is not recursion. After doing the recursive step, we have to take whatever value we got and append it to [h1 + h2].
+
+Fix:
+def sum_lists(a1, a2, sum=[]):
+  if a1 == [] or a2 == []:
+    return sum
+  h1 = a1[0]
+  t1 = a1[1:]
+  h2 = a2[0]
+  t2 = a2[1:]
+  sum = sum + [h1 + h2]
+  return sum_lists(t1, t2, sum)
+
+===================================
+Question 9
+a) x
+b) (y y)
+c) \v.((v v) v)
+
+************************
+** Section 3: Haskell **
+************************
+
+===================================
+Question 10
+a) a -> [a]
+b) (b -> b) -> [a] -> b
+c) Eq a => a -> a -> Bool
+d) String -> [IO () , IO ()]
+
+===================================
+Question 11
+a) Just "x1y2"
+b) error, you can't append string and Nothing
+c) Just [-12, 5, 2, 5, 4]
+d) error, you can't append Nothing to a Maybe [Int]
+
+
+===================================
+Question 12
+insertInOrder :: Ord a => a -> [a] -> [a]
+insertInOrder v [] = [v]
+insertInOrder v (h:t) = if v <= h then v : (h:t) else h : (insertInOrder v t)
+
+
+===================================
+Question 13
+reduceMatrix :: (a->a->a) -> (a->a->a) -> [[a]] -> a
+reduceMatrix f1 f2 m = op f1 (map (op f2) m)
+
+op :: (a->a->a) -> [a] -> a
+op f [a, b] = f a b
+op f (h:t) = f h (op f t)
+
+===================================
+Question 14
+getAge :: IO (Maybe Int)
+getAge = do putStrLn "Enter age: "
+            l <- getLine
+            ans <- readMaybe l
+            case ans of
+              Just a -> return (Just a)
+              Nothing -> do putStrLn "Enter age: "
+                            l <- getLine
+                            ans <- readMaybe l
+                            case ans of
+                              Just a -> return (Just a)
+                              Nothing -> do putStrLn "Enter age: "
+                                            l <- getLine
+                                            ans <- readMaybe l
+                                            case ans of
+                                              Just a -> return (Just a)
+                                              Nothing -> return Nothing
+
+
+
+===================================
+Question 15
+isComplete :: Tree a -> Bool
+isComplete t = areEqual (helper t 0)
+
+areEqual :: [Int] -> Bool
+areEqual [a] = True
+areEqual [a,b] = a == b
+areEqual (h:(h2:t)) = if h == h2 then areEqual (h2:t) else False
+
+helper :: Int -> Tree a -> [Int]
+helper (Node a []) i = [i]
+helper (Node a lst) i = concat map (helper (i+1)) lst
