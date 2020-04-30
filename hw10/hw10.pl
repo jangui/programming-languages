@@ -15,7 +15,6 @@ otherTree(X) :-
     t("t2b",
       t("t3c", nil, t("t4f", t("5", nil, nil), nil)),
       t("t3d", nil, nil))).
-      %t("t3d", t("t4g", nil, t("5", nil, nil)), nil))).
 
 flipNode(nil, nil).
 flipNode(t(V, L, R), t(V, R, L)).
@@ -25,12 +24,15 @@ getVal(nil, nil).
 getVal(t(V, _, _), V).
 
 flipTree(nil, nil).
-flipTree(t(V, L, R), t(V, L2, R2)) :- getVal(L, X), getVal(R2, X), getVal(R, Y), getVal(L2, Y), 
+flipTree(t(V, L, R), t(V, L2, R2)) :- getVal(L, X), getVal(R2, X),
+                                      getVal(R, Y), getVal(L2, Y), 
                                       flipTree(L, R2), flipTree(R, L2).
 % Question 2
 inorderTraversalSpatial(t(V, nil, nil), [V]). 
-inorderTraversalSpatial(t(V, L, nil), X) :- inorderTraversalSpatial(L, LV), append(LV, [V], X).
-inorderTraversalSpatial(t(V, nil, R), X) :- inorderTraversalSpatial(R, RV), append([V], RV, X).
+inorderTraversalSpatial(t(V, L, nil), X) :- inorderTraversalSpatial(L, LV),
+                                            append(LV, [V], X).
+inorderTraversalSpatial(t(V, nil, R), X) :- inorderTraversalSpatial(R, RV),
+                                            append([V], RV, X).
 inorderTraversalSpatial(t(V, L, R), X) :- inorderTraversalSpatial(L, LV),
                                           inorderTraversalSpatial(R, RV),
                                           append(LV, [V], Y),
@@ -83,20 +85,3 @@ isCycle(G, S, Visited) :- append([S], Visited, Lst), member(S-X, G), isCycle(G, 
 
 %from every start point, check if theres a cycle
 hasCycle(G) :- member(Y-_, G), isCycle(G, Y, []),!.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
