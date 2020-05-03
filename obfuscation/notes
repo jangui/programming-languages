@@ -1,0 +1,115 @@
+from pedro fortuna's talk OWASP 2013
+https://www.youtube.com/watch?v=J68iLsd525k
+obfuscation -
+making it more difficult to understand 
+
+why? when u cant put sensitive code on server
+  cant put on server sometimes bc
+    -cheaper not to
+    -faster
+    -etc
+
+hiding source code in plain site
+  -protect intelect prop
+  -prevent code theft
+hide malicious code
+
+obfuscation != encryption
+obfuscated code runs!
+
+obfuscation?
+lowering code readabilty
+
+metrics:
+potency
+resiliance
+steathiness
+execution cost
+maintainability
+
+potency *often regarded as most impo
+  generate confusion
+  how hard to read code after appling obfuscation
+
+resiliance *most impo
+  how hard to revert code to original form  
+
+  combat w/ static and dynamic code analysis
+  static techniques can automatically unobfuscat
+  dynamic is manuel
+
+stealthiness
+  how hard is it to spot the obfuscation?
+
+execution cost:
+  won't improve preformance, shouldnt impact preformance tho
+  renames are usually shorter, files smaller
+
+maintalabilty:
+  reverse of potency
+  more maintainable, probably less resilient
+    maybe u have a unobfuscator to maintain
+  if the real code is low maintence, ppl might want to steal more
+
+tatics:
+  potency + resiliance:
+    rename functions and vars
+    remove comments
+    whitespace removal
+
+
+simplifications vs obfuscating
+  simplifications is not really potent or resilient
+
+nonalphanumeric obfucation
+  very potent!
+  uses type coercion and browswers quicks
+  ~[] = -1
+  ~!+[] = -2
+  +[] = 0
+  +!+[] = 1
+  +!+[]+!+[] = 2
+  -[]+[] = "0"
+  +[]+"" = "0"
+  -[]+!+[]+[] = "1"
+  +!+[]+[]+"" = "1"
+
+  get characters as well
+  ![] = false
+  ![] + '' = 'false' // or ![] + []
+  (![]+'')[0] = 'f'
+  (![]+'')[+[]] = 'f'
+
+  (![]+'')[1] = 'a'
+  (![] + '')[+!+[]] = 'a'
+  we can aquire letters in false, true, Nan, object Object, undefined
+    also dashes from negative nums to string
+  !+[] = true
+  !![] = true
+  !![]+[] = "true"
+  !![]+'' = "true"
+
+  ![] = false
+  ![]+''= "false"
+  ![]+""= "false"
+  ![]+[] = false
+
+  []+{} = "[object Object]"
+  [][_]+[] = "undefinded"
+
+
+  low stealthiness, very large files
+  eval is slower
+
+  not really resilient, but good for bypassing filters
+
+
+deadcode
+  opaque predicates
+    predicates hard to tell if false or true statically
+
+  adds some confusion and stuffiness
+
+encoding code
+
+after closure compiler
