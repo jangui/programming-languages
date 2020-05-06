@@ -64,6 +64,14 @@ simplifications vs obfuscating
 nonalphanumeric obfucation
   very potent!
   uses type coercion and browswers quicks
+    type coercion:
+      implicitly convert one type to another
+      
+    javascript is weakly typed
+      type established at runtime
+      (strong = type at compile)
+  
+
   ~[] = -1
   ~!+[] = -2
   +[] = 0
@@ -98,6 +106,8 @@ nonalphanumeric obfucation
   [][_]+[] = "undefinded"
 
 
+//https://mrpapercut.com/blog/2016-09-06-non-alphanum-obfuscator
+
   low stealthiness, very large files
   eval is slower
 
@@ -113,3 +123,8 @@ deadcode
 encoding code
 
 after closure compiler
+
+
+
+opaque predicates
+

@@ -17,6 +17,14 @@
       -the value carries the type and has a mem addr
     -ex: python
 
+  -strongly typed vs weakly typed
+    -presence or absensce of:
+      -type safety
+      -memory safety
+      -static type checking
+      -dynamic type checking
+
+
   -types are sets of values
     -subtyping is when children are in the set of values of parent type
     -type synonims are not new types but aliases
