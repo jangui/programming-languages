@@ -1,0 +1,33 @@
+
+  +[] = 0
+  +!+[] = 1
+  +!+[]+!+[] = 2
+
+  ~[] = -1
+  ~!+[] = -2
+
+  -[]+[] = "0"
+
+  ""++[] = "0"
+
+  ![] = false
+  ![] + [] = 'false'
+  (![]+'')[0] = 'f'
+  (![]+'')[+[]] = 'f'
+
+  (![]+'')[1] = 'a'
+  (![] + '')[+!+[]] = 'a'
+
+  we can aquire letters in false, true, Nan, object Object, undefined
+    also dashes from negative nums to string
+  !![]+'' = "true"
+
+  ![] = false
+  ![]+''= "false"
+
+  []+{} = "[object Object]"
+  [][_]+[] = "undefinded"
+
+
+this is a biggy!!
+  20['toString'](36)

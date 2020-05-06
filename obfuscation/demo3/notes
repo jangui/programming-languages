@@ -1,0 +1,14 @@
+eval("console.log('hello world')")
+
+Function("console.log('hello world')")()
+
+more strings! yay
+
+we can do better.. 
+
+""["constructor"]
+function String()
+
+[]["constructor"]["constructor"]
+Function()
+
