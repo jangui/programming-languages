@@ -230,8 +230,230 @@ infinite data types are only expanded as far out as they need to be because they
 type class with bind function defined
 
 
-##EXAM 1 is everything above
-
 ## kinds ##
 -types of types
 
+## value types ##
+example in haskell:
+data Nat = Zero | Succ Nat
+type Zero = Zero
+type One = Succ Zero
+type Two = Succ One
+
+
+## small talk  / pharo ##
+object oriented language
+everything is a method
+
+use "^" to return
+
+kinds of methods
+  unary
+  binary
+  keyword
+^this is also order of precedence (unary first)
+
+unary:
+  3 factorial.
+
+binary: 
+  3 + 4.
+
+keyword:
+  3 ifTrue: [bc]
+
+
+Block Closuers
+[ args | body ].
+
+Vars
+  |myvar| (init to 0)
+  myvar := 1.
+
+Defining Classes
+When defined, classes are instances of "class" type
+to get instance of class, you need to use the "new" method.
+
+aFoo := Foo new.
+
+## Memory Structure of Classes ##
+classes are basically represented like structs in memory
+
+methods are function pointers
+
+inheritance = copy parent struct and extend with your own things
+
+
+address 0 of the struct is the Virtual Method Table (VMT) pointer
+  pointer to another struct (VMT) where function pointers to methods are
+  only non virtual methods are in VMT, (useful for inheritance)
+
+  if a method is not virtual, it gets stored sequencially, not in VMT
+
+Non Virtual Methods are faster (address known statically)
+Virtual Methods can be overwritten and need to be checked in runtime
+
+There is 1 VMT per class
+  constructor will init class to point to correct VMT addr
+    happens at end of constructor
+      calls to virtual methods in constructor will call parent's methods
+        generally avoid virtual calls in const / deconstr
+
+Constructors in C++
+  init vars
+  init ancestor vars (call parent constr) (sets up VMT for par)
+  run any constructor code
+  setup VMT
+
+  
+## Javascript Objects ##
+js objects are basically like a map (dict)
+object has labels which hold vals of vars or method's func ptrs
+
+we can define a normal function to be used a a constructor by calling it using the "new" keyword
+
+ex:
+
+pet = new Animal(4);
+
+function Animal(x) {
+  this.legs = x;
+  this.isDead = false;
+}
+
+Animal.prototype.kill = function() {this.isDead = true;}
+
+
+"new" will treat a function as a constructor and return an instance
+
+objects (maps in js) have a label called prototype
+prototype works like VMT in c++
+prototype is an object that holds funcs
+
+pet = new Animal(4);
+
+pet obj
+  legs ----> 4
+  isDead --> false
+  __proto__  ----> {kill, proto --> {}}
+
+
+if we did pet.kill() we'd search in proto to see if theres a kill method
+then we would search proto's proto obj
+
+to get inheritance, what basically happens in child's constructor will create an instance of parent inside childs proto
+
+Child.prototype = new Parent();
+
+child will now have all of parents members and parents proto
+
+
+## Prolog ##
+programming language based on predicate logic 
+works just as horne clauses do
+
+horne clause:
+  statement that is true if all statements it is composed of are true
+
+ex: L1 & L2 => L
+L is true if L1 and L2 are true
+
+=> A
+A is a "fact" always true (no reqs)
+
+in prolog:
+L :- L1, L2.
+
+prolog has atoms and Variables
+Variables start with capitols, and can be unified to other values
+atoms are lowercase, or nums, and are set values
+
+legs(cow, 4). (fact bcs cows and 4 are atoms, thus true).
+edible(cow).
+
+legs(X, 4). (X = cow) X, var, unifies to cow
+legs(cow, X). (X = 4) (reverse works too!)
+
+legs(X, 4), edible(X). (X = cow) X needs to unify to same value for both statements in order to be true, if multiple matches exist, X will match multiple times
+
+Predicates
+  temporal
+    sequenced results (use match all predicated to print each result)
+  spacial
+    one result composed of all results
+
+How to stop backtracking (searching for more possible results)
+  use cut! ("!")
+  more efficient but changes meaning of code
+    predicates also can't go in reverse now
+
+doing math
+X is 3+4 (good)
+7 is X+4 (bad) (aka can't go backwards)
+
+how to do math backwards? CLPFD module (#operator)
+X #= 3+4
+10 #= X + 7
+uses constraint satisfaction to solve
+
+## Garbage Collection ##
+In python
+  objects have "marked" flags
+  locals / globals become roots in a graph
+  Mark & Sweep alg used
+  done in another thread (Global interpreter lock required) (GIL)
+    not actually concurrent bcs mark & sweep not thread safe
+
+Mark & Sweep
+  not thread safe
+  causes irregular pauses in execution
+  1. start at root and traverse downward the objs it references
+  2. mark obj if referenced, (0 and 1 is fine, count not needed)
+  3. if any obj at end has 0 marks, get rid of it
+
+Generational Garbage Collection
+  motivation is that objects are ususally either very short or long lived
+  make generational buckets (young / old) (could have multiple buckets)
+  do mark and sweep and keep count of how often object survives
+  if survives passed threshold, move to old bucket
+  objects in old bucket get marked and swept less frequently then young
+  multiple pools with multiple freqs are fine
+
+Concurrent Garabaje Collection (White Grey Black) *thread safe!*
+  3 stages of objects: white, grey, black
+  alg starts w/ init:
+    root objects are grey
+    non root are white
+    new or modified objs moved into grey section
+
+  move all grey objs into black section
+  move all objs pointed by black objs to grey
+  dealloc all objs in white
+
+
+## Reference Counting ##
+alternate to garbage collection
+  less overhead
+  cant deal with cicular references (possible to avoid tho)
+  clean up at end of function
+  using pointers that destruct automatically
+    desctructor gets called when var out of scope
+
+smart pointers
+  unique pointer - cant be copied (no reference counting needed)
+  shared pointer - reference count needed to know when to free obj
+
+shared pointer
+  has count for references to obj (count is on heap)
+  when we make a copy of our pointer, we inc refernce count
+  when count 0, free obj
+
+Borrow Checking in Rust is similar to reference counting
+  reference counting -> runtime
+  borrow checking -> compile time
+
+  Borrow checking makes sure no references to a value after its destroyed
+  borrowed refs cant extend lifetime of owned value
+  to return pointer mutable pointer must be used (only 1 mutable pointer to an obj can exist at a time, so when u return, prev is gone new one is returned)
+  You can have as many non mutable read only pointers to obj (reference count will be done at compile time on obj)
+  
